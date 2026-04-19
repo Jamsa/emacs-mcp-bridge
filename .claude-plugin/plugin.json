@@ -1,0 +1,9 @@
+{
+  "name": "emacs-mcp-bridge",
+  "description": "Skills and slash commands for collaborating with a live Emacs session via MCP. Provides in-place Ediff review, context-first reads, and text-transform helpers (polish, translate).",
+  "version": "0.2.0",
+  "author": {
+    "name": "Jamsa Zhu"
+  },
+  "license": "MIT"
+}

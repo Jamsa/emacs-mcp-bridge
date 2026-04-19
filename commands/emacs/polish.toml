@@ -1,0 +1,12 @@
+description = "Polish the active Emacs selection (fix typos, grammar, improve clarity)"
+
+prompt = """
+Fix typos, grammar issues, and polish the writing quality of the currently selected region in Emacs.
+
+Steps:
+1. Call `mcp__emacs__get-active-buffer-context` to retrieve the focused buffer and active selection.
+2. If `selection` is null or empty, stop and tell the user to select a region first.
+3. Rewrite the selected text to fix typos and grammar errors and improve clarity and flow. Preserve the original meaning, tone, and language (Chinese stays Chinese, English stays English). Keep Markdown, code blocks, inline code, and URLs intact.
+4. Call `mcp__emacs__interactive-merge-selection` with the polished text as the `text` argument.
+5. Tell the user: "Ediff is open. Press `b` to apply the change in-place, `q` to quit."
+"""

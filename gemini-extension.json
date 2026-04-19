@@ -1,0 +1,6 @@
+{
+  "name": "emacs-mcp-bridge",
+  "version": "0.2.0",
+  "description": "Skills and slash commands for collaborating with a live Emacs session via MCP. Provides in-place Ediff review, context-first reads, and text-transform helpers (polish, translate).",
+  "contextFileName": "GEMINI.md"
+}

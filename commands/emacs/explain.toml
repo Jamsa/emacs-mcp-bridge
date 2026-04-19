@@ -1,0 +1,14 @@
+description = "Explain the code, prose, or symbol at the cursor or in the active selection (read-only)"
+
+prompt = """
+Explain whatever the user is pointing at in Emacs. Read-only — do NOT modify the buffer.
+
+Steps:
+1. Call `mcp__emacs__get-active-buffer-context` with `include_content: false`.
+2. If `selection` is not null, explain it.
+3. Otherwise, call `mcp__emacs__get-thing-at-point`:
+   - For programming modes, try `thing: "defun"`, fall back to `thing: "symbol"` if no defun.
+   - For prose modes (markdown-mode, org-mode, text-mode), try `thing: "sentence"`, fall back to `thing: "paragraph"`.
+4. If still nothing, use `mcp__emacs__message-user` to tell the user to select a region first.
+5. Lead your response with a one-sentence answer. Add detail only if it helps the user act on it. Do not dump the full buffer. If you cannot determine behavior from the visible code, say so instead of hallucinating. Use `mcp__emacs__search-buffer` or `mcp__emacs__describe-symbol` to enrich when needed.
+"""

@@ -1,0 +1,12 @@
+description = "Translate the active Emacs selection into fluent, natural Simplified Chinese"
+
+prompt = """
+Translate or rewrite the currently selected region in Emacs into fluent, natural Simplified Chinese.
+
+Steps:
+1. Call `mcp__emacs__get-active-buffer-context` to retrieve the active selection.
+2. If `selection` is null or empty, stop and tell the user to select a region first.
+3. Translate the selected text into Simplified Chinese. Aim for idiomatic Chinese, preserve the meaning and tone, keep markup intact (Markdown, code blocks, inline code, URLs), and leave commonly-untranslated technical terms (API, SDK, LLM, etc.) in English.
+4. Call `mcp__emacs__interactive-merge-selection` with the Chinese text as the `text` argument.
+5. Tell the user: "Ediff is open. Press `b` to apply the change in-place, `q` to quit."
+"""
