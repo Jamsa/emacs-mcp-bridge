@@ -1,0 +1,11 @@
+description = "Insert AI-generated content at the current cursor position in Emacs"
+
+prompt = """
+Generate content based on the user's prompt and insert it at the current cursor position in Emacs.
+
+Steps:
+1. Call `mcp__emacs__get-active-buffer-context` to verify Emacs is connected.
+2. Generate content according to the user's prompt (e.g., "tell me a joke" → a joke).
+3. Call `mcp__emacs__insert-at-point` with the generated text as the `text` argument.
+4. Tell the user: "Content inserted at cursor."
+"""

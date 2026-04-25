@@ -1,0 +1,21 @@
+{
+    "name": "emacs-mcp-bridge",
+    "owner": {
+        "name": "Jamsa Zhu"
+    },
+    "metadata": {
+        "description": "Personal agent tooling — Emacs MCP bridge and related integrations"
+    },
+    "plugins": [
+        {
+            "name": "emacs-mcp-bridge",
+            "description": "Collaborate with a live Emacs session via MCP — in-place Ediff review, context-first reads, text-transform helpers (polish, translate)",
+            "category": "development",
+            "source": "./",
+            "category": "productivity",
+            "author": {
+                "name": "Jamsa Zhu"
+            }
+        }
+    ]
+}

@@ -1,15 +1,17 @@
 # emacs-mcp-bridge
 
-MCP tools + AI-client integration that let Claude Code and Gemini CLI collaborate with a live Emacs session. Reads the buffer you're looking at, edits via Ediff review with in-place apply, and ships three ready-made text-transform helpers (`/emacs:polish`, `/emacs:to-cn`, `/emacs:to-en`).
+MCP tools + AI-client integration that let Claude Code and Gemini CLI collaborate with a live Emacs session. Reads the buffer you're looking at, edits via Ediff review with in-place apply, and ships six ready-made text-transform helpers (`/emacs:polish`, `/emacs:to-cn`, `/emacs:to-en`, `/emacs:explain`, `/emacs:insert`, `/emacs:rewrite`).
 
 ## What's in the box
 
 - **17 MCP tools** (`emacs-mcp-bridge.el`) — context reads, Ediff-backed merges, project intelligence, buffer/file navigation, cursor introspection, user prompts/messages
-- **5 skills** (shared between Claude Code and Gemini CLI)
+- **7 skills** (shared between Claude Code and Gemini CLI)
   - `emacs-polish`, `emacs-to-cn`, `emacs-to-en` — selection transforms
   - `emacs-explain` — read-only: explain selection or thing-at-point
+  - `emacs-insert` — generate and insert content at cursor
+  - `emacs-rewrite` — custom rewrite based on user instruction
   - `emacs-integration` — protocol auto-invoked whenever `mcp__emacs__*` tools are present
-- **Slash-command aliases** for explicit invocation: `/emacs:polish`, `/emacs:to-cn`, `/emacs:to-en`, `/emacs:explain`
+- **Slash-command aliases** for explicit invocation: `/emacs:polish`, `/emacs:to-cn`, `/emacs:to-en`, `/emacs:explain`, `/emacs:insert`, `/emacs:rewrite`
 
 ## Architecture
 
@@ -62,10 +64,10 @@ See the upstream README for transport details (Unix socket path, wrapper script,
 
 #### 1b. Load `emacs-mcp-bridge`
 
-Add the `elisp/` directory to your `load-path` and require the bridge:
+After installing the plugin, add the elisp directory to your `load-path` and require the bridge. The exact path depends on your plugin installation location (e.g., `~/.claude/plugins/emacs-mcp-bridge/elisp`):
 
 ```elisp
-(add-to-list 'load-path "~/devel/agent-tools/plugins/emacs-mcp-bridge/elisp")
+(add-to-list 'load-path "~/path/to/emacs-mcp-bridge/elisp")
 (require 'emacs-mcp-bridge)
 ```
 
@@ -75,11 +77,11 @@ Or copy `elisp/emacs-mcp-bridge.el` to a directory already on your `load-path`.
 
 ### 2. Claude Code (optional)
 
-This plugin ships as part of the `agent-tools` local marketplace at `~/devel/agent-tools`. Register the marketplace once, then install by name:
+Install from the GitHub marketplace:
 
 ```bash
-claude plugin marketplace add ~/devel/agent-tools
-claude plugin install emacs-mcp-bridge@agent-tools
+claude plugin marketplace add Jamsa/emacs-mcp-bridge
+claude plugin install emacs-mcp-bridge@emacs-mcp-bridge
 ```
 
 Verify:
@@ -91,11 +93,7 @@ claude plugin list
 ### 3. Gemini CLI (optional)
 
 ```bash
-# For development — symlinks, edits are live:
-gemini extensions link ~/devel/agent-tools/plugins/emacs-mcp-bridge --consent
-
-# For production use — copies:
-gemini extensions install ~/devel/agent-tools/plugins/emacs-mcp-bridge --consent
+gemini extensions install https://github.com/Jamsa/emacs-mcp-bridge
 ```
 
 Verify inside an interactive `gemini` session that `/emacs:polish` is available.
@@ -111,9 +109,11 @@ Select a region in Emacs (or just point the cursor at something), then in your A
 /emacs:to-cn     # translate to Chinese        (Ediff review)
 /emacs:to-en     # translate to English        (Ediff review)
 /emacs:explain   # explain selection or cursor (read-only)
+/emacs:insert    # insert content at cursor   (direct insert, no review)
+/emacs:rewrite   # custom rewrite based on prompt (Ediff review)
 ```
 
-For the transform commands, the AI proposes a change via Ediff — press `b` on each hunk to apply in-place, then `q` to quit. `/emacs:explain` is read-only; it answers in chat without touching the buffer.
+For the transform commands, the AI proposes a change via Ediff — press `b` on each hunk to apply in-place, then `q` to quit. `/emacs:explain` is read-only; it answers in chat without touching the buffer. `/emacs:insert` inserts content directly at the cursor with no review.
 
 ### Natural language — skills auto-invoke
 
@@ -127,6 +127,9 @@ You don't have to remember slash commands. The skills' `description` metadata le
 | "rewrite this in English"                | `emacs-to-en`        |
 | "what does this function do?"            | `emacs-explain`      |
 | "explain this", "what is this symbol?"   | `emacs-explain`      |
+| "insert a joke here" / "add a header"    | `emacs-insert`       |
+| "rewrite this to be more formal"         | `emacs-rewrite`      |
+| "transform the selection", "rewrite this"| `emacs-rewrite`      |
 
 ### Example workflows
 
@@ -138,28 +141,34 @@ You don't have to remember slash commands. The skills' `description` metadata le
 4. Press `b` to apply the AI change directly to your buffer.
 5. Press `q` to close Ediff.
 
-Same pattern works for `/emacs:to-cn` (any language → Chinese) and `/emacs:to-en` (any language → English).
+Same pattern works for `/emacs:to-cn` (any language → Chinese), `/emacs:to-en` (any language → English), and `/emacs:rewrite` (custom rewrite based on your prompt).
 
-#### 2. Explain code without selecting it first
+#### 2. Insert content at cursor
+
+1. In Emacs, position the cursor where you want content inserted.
+2. Type `/emacs:insert tell me a joke` in the AI client.
+3. Content is inserted directly at the cursor — no Ediff review needed.
+
+#### 3. Explain code without selecting it first
 
 1. Put the cursor on a function name or symbol.
 2. Type `/emacs:explain` or just ask `"what does this do?"`
 3. The AI calls `get-thing-at-point` with `thing: "defun"` (or `"symbol"`) — no selection needed.
 4. Answer arrives in chat. Your buffer is untouched.
 
-#### 3. Natural-language editing
+#### 4. Natural-language editing
 
 > *"Rewrite the second bullet in Chinese, but keep the technical terms like API, SDK, LLM in English."*
 
 With a region selected, the AI routes this to `emacs-to-cn`, respects your constraint, and opens Ediff for review. No command syntax required.
 
-#### 4. Context-first investigation (no edit)
+#### 5. Context-first investigation (no edit)
 
 > *"What are the sub-categories discussed in this file?"*
 
 The AI calls `get-active-buffer-context` with `include_content: true` (because the answer needs the full file), scans, and replies. Your buffer is read-only to it unless you say otherwise.
 
-#### 5. Interactive dialog with `prompt-user`
+#### 6. Interactive dialog with `prompt-user`
 
 > *"Refactor this function — I want to extract the validation logic."*
 
@@ -171,7 +180,7 @@ Extract validation as:  [1] standalone function   [2] inline helper   [3] cancel
 
 You pick in the Emacs minibuffer; the AI proceeds with your choice and opens Ediff on the result.
 
-#### 6. Status without chat noise — `message-user`
+#### 7. Status without chat noise — `message-user`
 
 After applying a multi-step edit, the AI can call `message-user` with `"Applied 3 fixes across lines 42, 87, 104"`. You see it in the Emacs echo area; the chat stays clean.
 
@@ -180,6 +189,8 @@ After applying a multi-step edit, the AI can call `message-user` with `"Applied 
 ```text
 Select → /emacs:polish       # fix up rough prose
 Select → /emacs:to-cn        # localize an English note
+Select → /emacs:rewrite      # custom rewrite with your prompt
+Cursor → /emacs:insert       # insert generated content at cursor
 Cursor on identifier → /emacs:explain
 "Where is TransactionMonitor defined?"       # triggers list-files-in-project + search
 "Add a docstring to this function"           # triggers interactive-merge-selection
