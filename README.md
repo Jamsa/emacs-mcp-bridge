@@ -17,7 +17,7 @@ MCP tools + AI-client integration that let Claude Code and Gemini CLI collaborat
 
 ```
   ┌─────────────────────┐    stdio/MCP    ┌─────────────────────┐
-  │  Claude Code        │ ◄────────────► │                     │
+  │  Claude Code        │ ◄────────────►  │                     │
   │  Gemini CLI         │                 │   Emacs             │
   │  (any MCP client)   │                 │  + emacs-mcp-server │
   └─────────────────────┘                 │  + emacs-mcp-bridge │
@@ -64,7 +64,7 @@ See the upstream README for transport details (Unix socket path, wrapper script,
 
 #### 1b. Load `emacs-mcp-bridge`
 
-After installing the plugin, add the elisp directory to your `load-path` and require the bridge. The exact path depends on your plugin installation location (e.g., `~/.claude/plugins/emacs-mcp-bridge/elisp`):
+After installing the plugin, add the elisp directory to your `load-path` and require the bridge. The exact path depends on your plugin installation location (e.g., ` ~/.claude/plugins/marketplaces/emacs-mcp-bridge/elisp/emacs-mcp-bridge.el or  ~/.gemini/extensions/emacs-mcp-bridge/elisp`):
 
 ```elisp
 (add-to-list 'load-path "~/path/to/emacs-mcp-bridge/elisp")
@@ -123,7 +123,7 @@ You don't have to remember slash commands. The skills' `description` metadata le
 |------------------------------------------|----------------------|
 | "fix the grammar in this paragraph"      | `emacs-polish`       |
 | "polish this", "clean up this writing"   | `emacs-polish`       |
-| "translate this to Chinese" / "中文化"   | `emacs-to-cn`        |
+| "translate this to Chinese" / "中文化"    | `emacs-to-cn`        |
 | "rewrite this in English"                | `emacs-to-en`        |
 | "what does this function do?"            | `emacs-explain`      |
 | "explain this", "what is this symbol?"   | `emacs-explain`      |
@@ -230,13 +230,44 @@ All three `interactive-merge-*` tools apply changes **in-place** to the original
 
 ## Development
 
-Edit in place at `~/devel/agent-tools/plugins/emacs-mcp-bridge/` and reload Emacs after elisp edits:
+### Local development setup
 
-```
-M-x load-file RET ~/devel/agent-tools/plugins/emacs-mcp-bridge/elisp/emacs-mcp-bridge.el RET
+For local development, you can install from the local path:
+
+**Claude Code:**
+```bash
+# Register the local marketplace
+claude plugin marketplace add /path/to/emacs-mcp-bridge
+
+# Install the plugin
+claude plugin install emacs-mcp-bridge@emacs-mcp-bridge
 ```
 
-Because the Gemini extension is linked (not copied), edits under this path are immediately live for Gemini CLI. For Claude Code, run `claude plugin marketplace update agent-tools` after structural changes.
+**Gemini CLI:**
+```bash
+# Symlink for live development (edits are immediately live)
+gemini extensions link /path/to/emacs-mcp-bridge --consent
+```
+
+**Emacs elisp path:** After installing, load the bridge:
+```elisp
+(add-to-list 'load-path "/path/to/emacs-mcp-bridge/elisp")
+(require 'emacs-mcp-bridge)
+```
+
+### Reloading after edits
+
+Edit elisp code in place and reload:
+```
+M-x load-file RET /path/to/emacs-mcp-bridge/elisp/emacs-mcp-bridge.el RET
+```
+
+For Claude Code structural changes, run:
+```
+claude plugin marketplace update emacs-mcp-bridge
+```
+
+For Gemini CLI, the symlinked extension is immediately live.
 
 ## License
 
